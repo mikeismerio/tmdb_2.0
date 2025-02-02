@@ -1,11 +1,9 @@
 # views/home.py
 import streamlit as st
-import pandas as pd
 from config import table
 from database import fetch_data
 from utils import get_image_url
 
-@st.cache_data
 def filter_top_shows(df, genre):
     """Filtra y ordena los 10 mejores shows según el género."""
     if genre:
@@ -16,7 +14,6 @@ def filter_top_shows(df, genre):
             # Copia para evitar advertencias de pandas
             top_shows = top_shows.copy()
             top_shows['image_url'] = base_url + top_shows['poster_path']
-            # Asegurarse de que se tengan imágenes válidas
             return top_shows[top_shows['image_url'].notna()]
     return pd.DataFrame()
 
@@ -27,11 +24,10 @@ def app():
     query = f"SELECT * FROM {table}"
     df = fetch_data(query)
 
-    # Input para el género
-    genre_input = st.text_input("Introduce el Género:", st.session_state.get("search_genre", ""))
-    
+    # Input para el género (sin guardar en session_state)
+    genre_input = st.text_input("Introduce el Género:")
+
     if genre_input:
-        st.session_state.search_genre = genre_input
         top_shows = filter_top_shows(df, genre_input)
         
         if not top_shows.empty:
@@ -43,10 +39,7 @@ def app():
                 with cols[index % cols_per_row]:
                     st.image(row.image_url, use_container_width=True)
                     # Validar el año de estreno
-                    if hasattr(row, 'first_air_date') and row.first_air_date:
-                        first_air_year = str(row.first_air_date)[:4]
-                    else:
-                        first_air_year = "N/A"
+                    first_air_year = str(row.first_air_date)[:4] if row.first_air_date else "N/A"
                     
                     button_label = f"{row.name} ({first_air_year})"
                     if st.button(button_label, key=row.Index):
