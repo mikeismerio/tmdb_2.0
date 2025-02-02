@@ -1,56 +1,56 @@
 # views/movies.py
 import streamlit as st
-import pandas as pd
-from config import TABLE_MOVIES
+from config import table
 from database import fetch_data
 from utils import get_image_url
 
+def filter_top_movies(df, genre):
+    """Filtra y ordena las 10 mejores películas según el género."""
+    if genre:
+        filtered_movies = df[df['genres'].str.contains(genre, case=False, na=False)]
+        top_movies = filtered_movies.sort_values(by='vote_average', ascending=False).head(10)
+        if not top_movies.empty:
+            base_url = "https://image.tmdb.org/t/p/w500"
+            top_movies = top_movies.copy()
+            top_movies['image_url'] = base_url + top_movies['poster_path']
+            return top_movies[top_movies['image_url'].notna()]
+    return pd.DataFrame()
+
 def app():
-    st.header("Buscar Películas")
+    st.header("Buscar Películas 🎥")
     st.sidebar.header("Filtros de Búsqueda (Películas)")
 
-    genre_input = st.sidebar.text_input("Género", st.session_state.get("genre_input", ""))
-    title_input = st.sidebar.text_input("Título", st.session_state.get("title_input", ""))
-    overview_input = st.sidebar.text_input("Descripción / Sinopsis", st.session_state.get("overview_input", ""))
-    exclude_adult = st.sidebar.checkbox("Excluir contenido adulto", value=st.session_state.get("exclude_adult", True))
-    search_button = st.sidebar.button("Buscar Películas")
+    genre_input = st.sidebar.text_input("Introduce el Género:")
 
-    if search_button:
-        st.session_state.genre_input = genre_input
-        st.session_state.title_input = title_input
-        st.session_state.overview_input = overview_input
-        st.session_state.exclude_adult = exclude_adult
+    # Consulta los datos de la tabla
+    query = f"SELECT * FROM {table}"
+    df = fetch_data(query)
 
-        # Consulta SQL optimizada
-        movie_query = f"""
-            SELECT TOP 10 *
-            FROM {TABLE_MOVIES}
-            WHERE vote_average IS NOT NULL
-            ORDER BY vote_average DESC
-        """
-        movie_data = fetch_data(movie_query)
+    if genre_input:
+        top_movies = filter_top_movies(df, genre_input)
+        
+        if not top_movies.empty:
+            cols_per_row = 5
+            cols = st.columns(cols_per_row)
+            
+            # Mostrar cada película en una columna
+            for index, row in enumerate(top_movies.itertuples()):
+                with cols[index % cols_per_row]:
+                    st.image(row.image_url, use_container_width=True)
+                    release_year = str(row.release_date)[:4] if row.release_date else "N/A"
+                    button_label = f"{row.title} ({release_year})"
 
-        if not movie_data.empty:
-            movie_data = movie_data[
-                (movie_data['genres'].str.contains(genre_input, case=False, na=False) if genre_input else True) &
-                (movie_data['title'].str.contains(title_input, case=False, na=False) if title_input else True) &
-                (movie_data['overview'].str.contains(overview_input, case=False, na=False) if overview_input else True)
-            ]
-            if exclude_adult:
-                movie_data = movie_data[movie_data['adult'] == 0]
+                    # Generar una clave única para el botón
+                    button_key = f"btn_{row.Index}_{row.id}"
 
-        if not movie_data.empty:
-            st.subheader("Resultados - Películas")
-            cols_movies = st.columns(2)
-            for i, row in enumerate(movie_data.itertuples()):
-                with cols_movies[i % 2]:
-                    st.image(get_image_url(row.poster_path), width=200)
-                    year = str(row.release_date)[:4] if pd.notna(row.release_date) else "N/A"
-                    if st.button(f"{row.title} ({year})", key=f"movie_{row.Index}"):
-                        st.session_state.selected_item = row._asdict()
+                    if st.button(button_label, key=button_key):
+                        st.session_state.selected_movie = row._asdict()  # Convertir en diccionario
                         st.session_state.page = "details"
+                        return  # Volver al flujo principal
         else:
-            st.warning("No se encontraron películas para los filtros seleccionados.")
-
-    if st.button("Volver a la Página Principal"):
+            st.warning("No se encontraron resultados para el género ingresado.")
+    else:
+        st.info("Introduce un género para buscar las Top 10 Películas.")
+    
+    if st.button("Volver al inicio"):
         st.session_state.page = "home"
