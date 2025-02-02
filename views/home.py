@@ -10,6 +10,8 @@ def app():
     with col1:
         if st.button("Buscar Series 📺"):
             st.session_state.page = "series"
+            st.experimental_rerun()  # Forzar la actualización inmediata
     with col2:
         if st.button("Buscar Películas 🎥"):
             st.session_state.page = "movies"
+            st.experimental_rerun()  # Forzar la actualización inmediata
