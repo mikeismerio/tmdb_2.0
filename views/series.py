@@ -35,21 +35,22 @@ def app():
 
         # Aplicar filtros solo si el DataFrame no está vacío
         if not show_data.empty:
-            # Para cada filtro, se verifica si la columna existe; si no, se utiliza True
-            if genre_input and "genres" in show_data.columns:
-                filter_genres = show_data["genres"].str.contains(genre_input, case=False, na=False)
-            else:
-                filter_genres = True
-
-            if title_input and "original_name" in show_data.columns:
-                filter_title = show_data["original_name"].str.contains(title_input, case=False, na=False)
-            else:
-                filter_title = True
-
-            if overview_input and "overview" in show_data.columns:
-                filter_overview = show_data["overview"].str.contains(overview_input, case=False, na=False)
-            else:
-                filter_overview = True
+            # Si se proporciona un filtro, se genera la serie booleana; si no, se genera una serie de True
+            filter_genres = (
+                show_data["genres"].str.contains(genre_input, case=False, na=False)
+                if genre_input
+                else pd.Series([True] * len(show_data), index=show_data.index)
+            )
+            filter_title = (
+                show_data["original_name"].str.contains(title_input, case=False, na=False)
+                if title_input
+                else pd.Series([True] * len(show_data), index=show_data.index)
+            )
+            filter_overview = (
+                show_data["overview"].str.contains(overview_input, case=False, na=False)
+                if overview_input
+                else pd.Series([True] * len(show_data), index=show_data.index)
+            )
 
             show_data = show_data[filter_genres & filter_title & filter_overview]
 
