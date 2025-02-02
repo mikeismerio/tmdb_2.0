@@ -2,9 +2,9 @@
 import streamlit as st
 
 def app():
-    st.title("Bienvenido a la Plataforma de Películas y Series 🎬")
+    st.title("Bienvenido a la Plataforma de Entretenimiento 🎬")
 
-    st.markdown("Elige una de las opciones para buscar contenido:")
+    st.markdown("Elige una de las opciones para comenzar:")
 
     col1, col2 = st.columns(2)
     with col1:
