@@ -2,15 +2,15 @@
 import sqlalchemy as sa
 import pandas as pd
 import streamlit as st
-
 from config import CONNECTION_STRING
 
+@st.cache_data
 def fetch_data(query):
     """Ejecuta una consulta SQL y devuelve un DataFrame."""
     try:
         engine = sa.create_engine(
-            CONNECTION_STRING, 
-            echo=False, 
+            CONNECTION_STRING,
+            echo=False,
             connect_args={"autocommit": True}
         )
         with engine.connect() as conn:
