@@ -3,7 +3,6 @@ import streamlit as st
 from utils import get_image_url
 
 def app():
-    # Verificar si hay un show seleccionado
     if "selected_movie" not in st.session_state or st.session_state.selected_movie is None:
         st.warning("No se ha seleccionado ninguna serie.")
         if st.button("Volver a la lista"):
