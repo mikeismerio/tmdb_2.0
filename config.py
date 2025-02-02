@@ -1,22 +1,18 @@
 # config.py
 import os
 
-# URL de la imagen de portada
-PORTADA_URL = "https://raw.githubusercontent.com/mikeismerio/tmdb_shows/main/home.jpg"
-
 # =================== Configuración de Base de Datos ===================
-SERVER = "nwn7f7ze6vtuxen5age454nhca-colrz4odas5unhn7cagatohexq.datawarehouse.fabric.microsoft.com"
-DATABASE = "TMDB"
-DRIVER = "ODBC Driver 17 for SQL Server"
-TABLE_SHOWS = "tmdb_shows_clean"
-TABLE_MOVIES = "tmdb_movies_clean"
+server = "nwn7f7ze6vtuxen5age454nhca-colrz4odas5unhn7cagatohexq.datawarehouse.fabric.microsoft.com"
+database = "TMDB"
+driver = "ODBC Driver 17 for SQL Server"
+table = "tmdb_shows_clean"  # Tabla a consultar
 
-# Credenciales (se asumen almacenadas en variables de entorno o en Streamlit Secrets)
+# Obtener credenciales desde variables de entorno (o Streamlit Secrets)
 USER = os.getenv("DB_USER")
 PASSWORD = os.getenv("DB_PASS")
 
 # Cadena de conexión
 CONNECTION_STRING = (
-    f"mssql+pyodbc://{USER}:{PASSWORD}@{SERVER}/{DATABASE}?"
-    f"driver={DRIVER}&Authentication=ActiveDirectoryPassword"
+    f"mssql+pyodbc://{USER}:{PASSWORD}@{server}/{database}?"
+    f"driver={driver}&Authentication=ActiveDirectoryPassword"
 )
